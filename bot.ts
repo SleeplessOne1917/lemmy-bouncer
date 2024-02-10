@@ -38,7 +38,10 @@ const bot = new LemmyBot({
                 commentView: {
                     creator: { actor_id, id: personId, local },
                     comment: { id },
+                    post: { id: postId },
                 },
+                botActions: { createComment, reportComment, removeComment },
+                __httpClient__,
             }) {
                 if (
                     !(
@@ -50,6 +53,28 @@ const bot = new LemmyBot({
                         (await isUserIdInAllowlist(personId))
                     )
                 ) {
+                    await createComment({
+                        parent_id: id,
+                        content: 'Community disclaimer',
+                        post_id: postId,
+                    });
+                    const {
+                        comment_report_view: {
+                            comment_report: { id: reportId },
+                        },
+                    } = await reportComment({
+                        comment_id: id,
+                        reason: 'User has yet to be vetted',
+                    });
+                    await removeComment({
+                        comment_id: id,
+                        reason: 'User cannot post to community unless vetted',
+                    });
+
+                    await __httpClient__.resolveCommentReport({
+                        report_id: reportId,
+                        resolved: false,
+                    });
                 }
             },
         },
