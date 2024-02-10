@@ -24,6 +24,29 @@ const rowExists = (db: Database, id: number) =>
         );
     });
 
+const upsert = (db: Database, id: number) =>
+    new Promise<void>((resolve, reject) => {
+        db.run(
+            `INSERT INTO ${USER_ALLOWLIST_TABLE} (id) VALUES ($id) WHERE NOT EXISTS(SELECT 1 FROM ${USER_ALLOWLIST_TABLE} WHERE id=$id);`,
+            {
+                $id: id,
+            },
+            (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            },
+        );
+    });
+
+export async function addToAllowList(id: number) {
+    await useDatabase(async (db) => {
+        await upsert(db, id);
+    });
+}
+
 export async function isUserIdInAllowlist(id: number) {
     let exists = false;
     await useDatabase(async (db) => {

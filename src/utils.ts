@@ -1,4 +1,4 @@
-import { PersonMentionView } from 'lemmy-bot';
+import { PersonMentionView, SearchOptions } from 'lemmy-bot';
 import { isUserIdInAllowlist } from './db';
 
 type Person = PersonMentionView['creator']; // I really should export all of the lemmy-js-client types from lemmy-bot
@@ -24,3 +24,19 @@ export const isAllowedToPost = async ({ actor_id, id, local }: Person) =>
         (instance) => instance === getInstanceFromActorId(actor_id),
     ) ||
     (await isUserIdInAllowlist(id));
+
+const userExtractRegex = /.*(@(\S{3,})@(\S+\.\S{2,})).*/i;
+
+export function findUsersToAllow(message: string) {
+    const users: SearchOptions[] = [];
+
+    for (
+        let match = userExtractRegex.exec(message);
+        match;
+        match = userExtractRegex.exec(message)
+    ) {
+        users.push({ instance: match[3], name: match[2] });
+    }
+
+    return users;
+}

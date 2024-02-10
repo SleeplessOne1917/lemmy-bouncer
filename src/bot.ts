@@ -1,5 +1,6 @@
 import { LemmyBot } from 'lemmy-bot';
-import { isAllowedToPost } from './utils';
+import { findUsersToAllow, isAllowedToPost } from './utils';
+import { addToAllowList } from './db';
 
 export const bot = new LemmyBot({
     instance: 'hexbear.net',
@@ -94,6 +95,49 @@ export const bot = new LemmyBot({
                     });
                 }
             },
+        },
+        async privateMessage({
+            messageView: {
+                private_message: { content },
+                creator: { id: creatorId },
+            },
+            botActions: {
+                isCommunityMod,
+                getCommunityId,
+                getUserId,
+                sendPrivateMessage,
+            },
+        }) {
+            const communityId = await getCommunityId('traaaaaaannnnnnnnnns');
+
+            if (communityId === undefined) {
+                console.log('error finding community');
+                return;
+            }
+
+            const isMod = await isCommunityMod({
+                community_id: communityId,
+                person_id: creatorId,
+            });
+
+            if (isMod) {
+                const userSearchOptions = findUsersToAllow(content);
+
+                await Promise.allSettled(
+                    userSearchOptions.map((options) =>
+                        getUserId(options).then((id) => {
+                            if (id) {
+                                addToAllowList(id);
+                            }
+                        }),
+                    ),
+                );
+
+                await sendPrivateMessage({
+                    content: 'Users added!',
+                    recipient_id: creatorId,
+                });
+            }
         },
     },
 });
