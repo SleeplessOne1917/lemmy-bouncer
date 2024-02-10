@@ -1,22 +1,7 @@
 import { LemmyBot } from 'lemmy-bot';
-import { isUserIdInAllowlist } from './db';
+import { isAllowedToPost } from './utils';
 
-const allowedInstances = ['lemmygrad.ml'];
-
-const actorIdRegex = /https?\/\/([^\/]+\.[^\/]+)\/u\/\S+/;
-
-function getInstanceFromActorId(actorId: string) {
-    const match = actorIdRegex.exec(actorId);
-
-    if (match) {
-        return match[1];
-    } else {
-        console.log(`Could not parse instance from ${actorId}`);
-        return null;
-    }
-}
-
-const bot = new LemmyBot({
+export const bot = new LemmyBot({
     instance: 'hexbear.net',
     credentials: {
         password: 'password',
@@ -36,23 +21,16 @@ const bot = new LemmyBot({
             sort: 'New',
             async handle({
                 commentView: {
-                    creator: { actor_id, id: personId, local },
+                    creator,
                     comment: { id },
                     post: { id: postId },
                 },
                 botActions: { createComment, reportComment, removeComment },
                 __httpClient__,
             }) {
-                if (
-                    !(
-                        local ||
-                        allowedInstances.some(
-                            (instance) =>
-                                instance === getInstanceFromActorId(actor_id),
-                        ) ||
-                        (await isUserIdInAllowlist(personId))
-                    )
-                ) {
+                const canPost = await isAllowedToPost(creator);
+
+                if (!canPost) {
                     await createComment({
                         parent_id: id,
                         content: 'Community disclaimer',
@@ -71,7 +49,46 @@ const bot = new LemmyBot({
                         reason: 'User cannot post to community unless vetted',
                     });
 
+                    // Have to un-resolve because removing comments auto-resolves reports
                     await __httpClient__.resolveCommentReport({
+                        report_id: reportId,
+                        resolved: false,
+                    });
+                }
+            },
+        },
+        post: {
+            sort: 'New',
+            async handle({
+                postView: {
+                    creator,
+                    post: { id },
+                },
+                botActions: { createComment, reportPost, removePost },
+                __httpClient__,
+            }) {
+                const canPost = await isAllowedToPost(creator);
+
+                if (!canPost) {
+                    await createComment({
+                        content: 'Community disclaimer',
+                        post_id: id,
+                    });
+                    const {
+                        post_report_view: {
+                            post_report: { id: reportId },
+                        },
+                    } = await reportPost({
+                        post_id: id,
+                        reason: 'User has yet to be vetted',
+                    });
+                    await removePost({
+                        post_id: id,
+                        reason: 'User cannot post to community unless vetted',
+                    });
+
+                    // Have to un-resolve because removing comments auto-resolves reports
+                    await __httpClient__.resolvePostReport({
                         report_id: reportId,
                         resolved: false,
                     });
