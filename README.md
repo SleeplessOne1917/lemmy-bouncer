@@ -62,8 +62,7 @@ Once you start running your bot, posts and comments from non-allowed users in yo
 To add users to the user allow-list, privately message the bouncer with mentions of the accounts being added. It will message you back once it is finished adding them to tell you the results of your addition. If someone who isn't a moderator of the protected community privately messages the bouncer, it will not respond at all.
 
 A message you might send to the bouncer:
-<blockqoute>
-Add @nice@<span>lemmy</span>.world, @good@<span>hexbear</span>.net, and @wholesum@<span>forum.</span><span>basedcount</span>.com please!
-<blockqoute>
+
+> Add @nice@<span>lemmy</span>.world, @good@<span>hexbear</span>.net, and @wholesum@<span>forum.</span><span>basedcount</span>.com please!
 
 The precise wording doesn't matter: all that matters is that each person you want to add to the allow-list is specified in the format @person@<span>instance</span>.
