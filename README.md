@@ -13,7 +13,7 @@ Lemmy Bouncer makes it so that users who aren't from instances in an allow-list 
 ## Setup
 
 ### Required software
-The bot required NodeJS version 18 or higher to run. You can install dependencies using any of the popular JS package managers (npm, yarn, pnpm). Since the lockfile for the repo is generated from pnpm, you may get faster installation times by using pnpm.
+The bot requires NodeJS version 18 or higher to run. You can install dependencies using any of the popular JS package managers (npm, yarn, pnpm). Since the lockfile for the repo is generated from pnpm, you may get faster installation times by using pnpm.
 
 ### Create an acount for your bouncer
 In order to perform moderator actions, your bot will need an account. **Don't forget to appoint the bot as a moderator of the community you want it to protect!**
