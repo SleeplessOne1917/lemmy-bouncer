@@ -46,7 +46,7 @@ export const bot = new LemmyBot({
                     await createComment({
                         parent_id: id,
                         content:
-                            "Your comment requires manual vetting by a community moderator. If it passes manual review by a moderator, it will be restored.\n\nIf you want to be allowed to comment without without manual vetting every time, please contact one of this community' moderators.",
+                            "Your comment requires manual vetting by a community moderator. If it passes manual review by a moderator, it will be restored.\n\nIf you want to be allowed to comment without without manual vetting every time, please contact one of this community's moderators.",
                         post_id: postId,
                     });
                     const {
