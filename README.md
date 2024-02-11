@@ -22,9 +22,10 @@ Create a file titled `.env` in the topmost directory of the repo. Here, you can 
 The instance your bot's account will be on. Make sure to use just the domain name instead of a full URL. i.e:
 
 ✅ lemmy.ml
-❌ https://lemmy.ml
 
-The instance must also be the same intance as the community the bot will be protecting. This means, for example, @bouncer@lemmy.ml can protect !safeplace@lemmy.ml, but not !safeplace@lemmy.world.
+❌ https<span>://</span><span>lemmy.ml</span>
+
+The instance must also be the same instance as the community the bot will be protecting. This means, for example, @bouncer@<span>lemmy</span>.ml can protect !safeplace@<span>lemmy</span>.ml, but not !safeplace@<span>lemmy</span>.world.
 
 #### `USERNAME`
 The username of your bouncer bot.
@@ -36,7 +37,7 @@ The password for your bouncer bot's account.
 The path to a sqlite database file that will be used to store the user allow-list and other information needed to run the bot. E.g. `db.sqlite3`.
 
 #### `COMMUNITY`
-The name of the community the bouncer bot should protect. If the webfinger for your community is !safe@place.xyx, the correct name to use is "safe".
+The name of the community the bouncer bot should protect. If the webfinger for your community is !safe@<span>place</span>.xyx, the correct name to use is "safe".
 
 #### `FEDERATED_INSTANCE_ALLOWLIST`
 Space separated list of federated instances that users can post from without needing to be manually vetted or added to the user allow-list.
@@ -51,16 +52,18 @@ COMMUNITY = safe
 FEDERATED_INSTANCE_ALLOWLIST = lemm.ee midwest.social startrek.website
 ```
 
-## Using you bot
+## Using your bot
 Once you start running your bot, posts and comments from non-allowed users in your community will:
 1. Be replied to by the bouncer to explain why the post/comment is being removed
 2. Report the content with a reason saying that the post/comment needs to be vetted
 3. Remove the post/comment with a reason similar to the one in step 2
 
 ### Adding users to allow list
-To add users to the user allow-list, privately message the bouncer with mentions of the accounts being added. It will message you back once it is finished adding them to tell you the results of your addition. If somone who isn't a moderator of the protected community privately messages the bouncer, it will not respond at all.
+To add users to the user allow-list, privately message the bouncer with mentions of the accounts being added. It will message you back once it is finished adding them to tell you the results of your addition. If someone who isn't a moderator of the protected community privately messages the bouncer, it will not respond at all.
 
 A message you might send to the bouncer:
-> Add @nice@lemmy.world, @good@hexbear.net, and @wholesum@forum.basedcount.com please!
+<blockqoute>
+Add @nice@<span>lemmy</span>.world, @good@<span>hexbear</span>.net, and @wholesum@<span>forum.</span><span>basedcount</span>.com please!
+<blockqoute>
 
-The precise wording doesn't matter: all that matters is that each person you want to add to the allow-list is specified in the format @person@instance.
+The precise wording doesn't matter: all that matters is that each person you want to add to the allow-list is specified in the format @person@<span>instance</span>.
