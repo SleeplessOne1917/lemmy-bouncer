@@ -65,11 +65,13 @@ Once you start running your bot, posts and comments from non-allowed users in yo
 2. Report the content with a reason saying that the post/comment needs to be vetted
 3. Remove the post/comment with a reason similar to the one in step 2
 
+Some bare-bones templates for a Dockerfile and a systemd unit file can be found [here](https://github.com/SleeplessOne1917/lemmy-bot/tree/main/templates).
+
 ### Adding users to allow list
 To add users to the user allow-list, privately message the bouncer with mentions of the accounts being added. It will message you back once it is finished adding them to tell you the results of your addition. If someone who isn't a moderator of the protected community privately messages the bouncer, it will not respond at all.
 
 A message you might send to the bouncer:
 
-> Add @nice@<span>lemmy</span>.world, @good@<span>hexbear</span>.net, and @wholesum@<span>forum.</span><span>basedcount</span>.com please!
+> Add @nice@<span>lemmy</span>.world, @good@<span>hexbear</span>.net, and @wholesome@<span>forum.</span><span>basedcount</span>.com please!
 
 The precise wording doesn't matter: all that matters is that each person you want to add to the allow-list is specified in the format @person@<span>instance</span>.
