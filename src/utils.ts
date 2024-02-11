@@ -1,8 +1,6 @@
 import { Person } from 'lemmy-bot';
 import { isUserIdInAllowlist } from './db';
 
-const actorIdRegex = /https?\/\/([^\/]+\.[^\/]+)\/u\/\S+/;
-
 const FEDERATED_INSTANCE_ALLOWLIST: string[] = [];
 
 export function initInstanceAllowlist() {
@@ -14,6 +12,8 @@ export function initInstanceAllowlist() {
         FEDERATED_INSTANCE_ALLOWLIST.push(...instances);
     }
 }
+
+const actorIdRegex = /https?\/\/([^\/]+\.[^\/]+)\/u\/\S+/;
 
 export function getInstanceFromActorId(actorId: string) {
     const match = actorIdRegex.exec(actorId);
@@ -46,5 +46,5 @@ export function parseUsersToAllow(message: string) {
         users.push(`${match[2]}@${match[3]}`);
     }
 
-    return new Set(users);
+    return [...new Set(users)];
 }

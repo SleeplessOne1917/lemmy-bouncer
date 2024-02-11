@@ -102,11 +102,11 @@ export async function setupDB() {
     await useDatabase(async (db) => {
         db.serialize(() => {
             db.run(
-                `CREATE TABLE IF NOT EXISTS user_allowlist (id INTEGER PRIMARY KEY) WITHOUT ROWID;`,
+                `CREATE TABLE IF NOT EXISTS ${USER_ALLOWLIST_TABLE} (id INTEGER PRIMARY KEY) WITHOUT ROWID;`,
             );
 
             db.run(
-                `CREATE UNIQUE INDEX IF NOT EXISTS idx_user_allowlist_id ON user_allowlist (id);`,
+                `CREATE UNIQUE INDEX IF NOT EXISTS idx_${USER_ALLOWLIST_TABLE}_id ON ${USER_ALLOWLIST_TABLE} (id);`,
             );
         });
     });

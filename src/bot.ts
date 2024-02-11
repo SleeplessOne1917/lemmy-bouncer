@@ -139,7 +139,7 @@ export const bot = new LemmyBot({
                 const usersToAllow = parseUsersToAllow(content);
 
                 const personDetailsList = await Promise.allSettled(
-                    [...usersToAllow].map((username) =>
+                    usersToAllow.map((username) =>
                         getPersonDetails({ username }),
                     ),
                 );
