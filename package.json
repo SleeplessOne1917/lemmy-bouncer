@@ -1,14 +1,14 @@
 {
-  "name": "traaaaaaaa-bouncer-bot",
+  "name": "lemmy-bouncer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Protect your Lemmy community from unvetted posters.",
   "main": "index.js",
   "scripts": {
     "start": "ts-node main.ts"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "SleeplessOne1917",
+  "license": "AGPL-3.0",
   "devDependencies": {
     "@types/node": "^20.11.17",
     "prettier": "^3.2.5",
