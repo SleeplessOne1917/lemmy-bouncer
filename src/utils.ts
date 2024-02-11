@@ -28,14 +28,14 @@ export const isAllowedToPost = async ({ actor_id, id, local }: Person) =>
 const userExtractRegex = /.*(@(\S{3,})@(\S+\.\S{2,})).*/i;
 
 export function findUsersToAllow(message: string) {
-    const users: SearchOptions[] = [];
+    const users: string[] = [];
 
     for (
         let match = userExtractRegex.exec(message);
         match;
         match = userExtractRegex.exec(message)
     ) {
-        users.push({ instance: match[3], name: match[2] });
+        users.push(`${match[2]}@${match[3]}`);
     }
 
     return users;

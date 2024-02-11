@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,8 +14,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.1",
-    "lemmy-bot": "^0.5.2",
+    "dotenv": "^16.4.2",
+    "lemmy-bot": "^0.6.0",
     "sqlite3": "^5.1.7"
   }
 }

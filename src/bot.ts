@@ -26,8 +26,12 @@ export const bot = new LemmyBot({
                     comment: { id },
                     post: { id: postId },
                 },
-                botActions: { createComment, reportComment, removeComment },
-                __httpClient__,
+                botActions: {
+                    createComment,
+                    reportComment,
+                    removeComment,
+                    resolveCommentReport,
+                },
             }) {
                 const canPost = await isAllowedToPost(creator);
 
@@ -48,10 +52,11 @@ export const bot = new LemmyBot({
                     await removeComment({
                         comment_id: id,
                         reason: 'User cannot post to community unless vetted',
+                        removed: true,
                     });
 
                     // Have to un-resolve because removing comments auto-resolves reports
-                    await __httpClient__.resolveCommentReport({
+                    await resolveCommentReport({
                         report_id: reportId,
                         resolved: false,
                     });
@@ -65,8 +70,12 @@ export const bot = new LemmyBot({
                     creator,
                     post: { id },
                 },
-                botActions: { createComment, reportPost, removePost },
-                __httpClient__,
+                botActions: {
+                    createComment,
+                    reportPost,
+                    removePost,
+                    resolvePostReport,
+                },
             }) {
                 const canPost = await isAllowedToPost(creator);
 
@@ -86,10 +95,11 @@ export const bot = new LemmyBot({
                     await removePost({
                         post_id: id,
                         reason: 'User cannot post to community unless vetted',
+                        removed: true,
                     });
 
                     // Have to un-resolve because removing comments auto-resolves reports
-                    await __httpClient__.resolvePostReport({
+                    await resolvePostReport({
                         report_id: reportId,
                         resolved: false,
                     });
@@ -99,43 +109,43 @@ export const bot = new LemmyBot({
         async privateMessage({
             messageView: {
                 private_message: { content },
-                creator: { id: creatorId },
+                creator,
             },
             botActions: {
                 isCommunityMod,
-                getCommunityId,
-                getUserId,
+                getCommunity,
+                getPersonDetails,
                 sendPrivateMessage,
             },
         }) {
-            const communityId = await getCommunityId('traaaaaaannnnnnnnnns');
+            const communityResponse = await getCommunity({
+                name: 'traaaaaaannnnnnnnnns',
+            }).catch(() => null);
 
-            if (communityId === undefined) {
+            if (!communityResponse) {
                 console.log('error finding community');
                 return;
             }
 
             const isMod = await isCommunityMod({
-                community_id: communityId,
-                person_id: creatorId,
+                community: communityResponse.community_view.community,
+                person: creator,
             });
 
             if (isMod) {
                 const userSearchOptions = findUsersToAllow(content);
 
                 await Promise.allSettled(
-                    userSearchOptions.map((options) =>
-                        getUserId(options).then((id) => {
-                            if (id) {
-                                addToAllowList(id);
-                            }
-                        }),
+                    userSearchOptions.map((username) =>
+                        getPersonDetails({ username }).then((user) =>
+                            addToAllowList(user.person_view.person.id),
+                        ),
                     ),
                 );
 
                 await sendPrivateMessage({
                     content: 'Users added!',
-                    recipient_id: creatorId,
+                    recipient_id: creator.id,
                 });
             }
         },
