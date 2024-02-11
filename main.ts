@@ -7,9 +7,9 @@ config();
 
 async function start() {
     initInstanceAllowlist();
-    // await setupDB(process.env.DB_FILE);
+    await setupDB();
 
-    // bot.start();
+    bot.start();
 }
 
 start();
