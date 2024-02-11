@@ -12,6 +12,9 @@ Lemmy Bouncer makes it so that users who aren't from instances in an allow-list 
 
 ## Setup
 
+### Required software
+The bot required NodeJS version 18 or higher to run. You can install dependencies using any of the popular JS package managers (npm, yarn, pnpm). Since the lockfile for the repo is generated from pnpm, you may get faster installation times by using pnpm.
+
 ### Create an acount for your bouncer
 In order to perform moderator actions, your bot will need an account. **Don't forget to appoint the bot as a moderator of the community you want it to protect!**
 
@@ -53,6 +56,10 @@ FEDERATED_INSTANCE_ALLOWLIST = lemm.ee midwest.social startrek.website
 ```
 
 ## Using your bot
+
+### Running your bot
+Start your bot by running `npm run start` (or equivalent for other package managers).
+
 Once you start running your bot, posts and comments from non-allowed users in your community will:
 1. Be replied to by the bouncer to explain why the post/comment is being removed
 2. Report the content with a reason saying that the post/comment needs to be vetted
