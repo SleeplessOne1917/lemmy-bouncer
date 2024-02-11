@@ -1,4 +1,4 @@
-import { LemmyBot } from 'lemmy-bot';
+import { GetPersonDetailsResponse, LemmyBot } from 'lemmy-bot';
 import { parseUsersToAllow, isAllowedToPost } from './utils';
 import { addToAllowList } from './db';
 
@@ -136,14 +136,23 @@ export const bot = new LemmyBot({
             });
 
             if (isMod) {
-                const userSearchOptions = parseUsersToAllow(content);
+                const usersToAllow = parseUsersToAllow(content);
 
-                await Promise.allSettled(
-                    userSearchOptions.map((username) =>
-                        getPersonDetails({ username }).then((user) =>
-                            addToAllowList(user.person_view.person.id),
-                        ),
+                const personDetailsList = await Promise.allSettled(
+                    [...usersToAllow].map((username) =>
+                        getPersonDetails({ username }),
                     ),
+                );
+
+                await addToAllowList(
+                    personDetailsList
+                        .filter((res) => res.status === 'fulfilled')
+                        .map(
+                            (res) =>
+                                (
+                                    res as PromiseFulfilledResult<GetPersonDetailsResponse>
+                                ).value.person_view.person.id,
+                        ),
                 );
 
                 await sendPrivateMessage({

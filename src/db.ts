@@ -8,6 +8,14 @@ let memoryDb: Database | undefined = undefined;
 const sqlite = verbose();
 
 const USER_ALLOWLIST_TABLE = 'user_allowlist';
+const DB_FILE = process.env.DB_FILE;
+
+const parallelize = (db: Database, callback: () => Promise<void>) =>
+    new Promise<void>((resolve) => {
+        db.parallelize(() => {
+            callback().then(resolve);
+        });
+    });
 
 const rowExists = (db: Database, id: number) =>
     new Promise<boolean>((resolve, reject) => {
@@ -41,9 +49,11 @@ const upsert = (db: Database, id: number) =>
         );
     });
 
-export async function addToAllowList(id: number) {
+export async function addToAllowList(ids: number[]) {
     await useDatabase(async (db) => {
-        await upsert(db, id);
+        await parallelize(db, async () => {
+            await Promise.allSettled(ids.map((id) => upsert(db, id)));
+        });
     });
 }
 
@@ -56,13 +66,10 @@ export async function isUserIdInAllowlist(id: number) {
     return exists;
 }
 
-async function useDatabase(
-    doStuffWithDB: (db: Database) => Promise<void>,
-    dbPath?: string,
-) {
+async function useDatabase(doStuffWithDB: (db: Database) => Promise<void>) {
     let db: Database;
 
-    if (!dbPath) {
+    if (!DB_FILE) {
         if (memoryDb) {
             db = memoryDb;
         } else {
@@ -70,21 +77,21 @@ async function useDatabase(
             db = memoryDb;
         }
     } else {
-        db = new sqlite.Database(dbPath);
+        db = new sqlite.Database(DB_FILE);
     }
 
     await doStuffWithDB(db);
 
-    if (dbPath) {
+    if (DB_FILE) {
         db.close();
     }
 }
 
-export async function setupDB(dbPath?: string) {
-    if (dbPath && !existsSync(dbPath)) {
+export async function setupDB() {
+    if (DB_FILE && !existsSync(DB_FILE)) {
         try {
-            await mkdir(path.dirname(dbPath), { recursive: true });
-            await writeFile(dbPath, '');
+            await mkdir(path.dirname(DB_FILE), { recursive: true });
+            await writeFile(DB_FILE, '');
         } catch (error) {
             console.log('Error making database file: ' + error);
 
@@ -102,5 +109,5 @@ export async function setupDB(dbPath?: string) {
                 `CREATE UNIQUE INDEX IF NOT EXISTS idx_user_allowlist_id ON user_allowlist (id);`,
             );
         });
-    }, dbPath);
+    });
 }

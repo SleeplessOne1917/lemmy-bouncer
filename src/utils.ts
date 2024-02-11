@@ -46,5 +46,5 @@ export function parseUsersToAllow(message: string) {
         users.push(`${match[2]}@${match[3]}`);
     }
 
-    return users;
+    return new Set(users);
 }
