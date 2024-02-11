@@ -3,7 +3,17 @@ import { isUserIdInAllowlist } from './db';
 
 const actorIdRegex = /https?\/\/([^\/]+\.[^\/]+)\/u\/\S+/;
 
-const allowedInstances = ['lemmygrad.ml'];
+const FEDERATED_INSTANCE_ALLOWLIST: string[] = [];
+
+export function initInstanceAllowlist() {
+    if (FEDERATED_INSTANCE_ALLOWLIST.length === 0) {
+        const instances = (process.env.FEDERATED_INSTANCE_ALLOWLIST as string)
+            .trim()
+            .split(/\s+/);
+
+        FEDERATED_INSTANCE_ALLOWLIST.push(...instances);
+    }
+}
 
 export function getInstanceFromActorId(actorId: string) {
     const match = actorIdRegex.exec(actorId);
@@ -18,14 +28,14 @@ export function getInstanceFromActorId(actorId: string) {
 
 export const isAllowedToPost = async ({ actor_id, id, local }: Person) =>
     local ||
-    allowedInstances.some(
+    FEDERATED_INSTANCE_ALLOWLIST.some(
         (instance) => instance === getInstanceFromActorId(actor_id),
     ) ||
     (await isUserIdInAllowlist(id));
 
 const userExtractRegex = /.*(@(\S{3,})@(\S+\.\S{2,})).*/i;
 
-export function findUsersToAllow(message: string) {
+export function parseUsersToAllow(message: string) {
     const users: string[] = [];
 
     for (

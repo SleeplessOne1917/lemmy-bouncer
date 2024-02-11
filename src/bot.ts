@@ -1,5 +1,5 @@
 import { LemmyBot } from 'lemmy-bot';
-import { findUsersToAllow, isAllowedToPost } from './utils';
+import { parseUsersToAllow, isAllowedToPost } from './utils';
 import { addToAllowList } from './db';
 
 const { LOCAL_INSTANCE, USERNAME, PASSWORD, DB_FILE, COMMUNITY } =
@@ -136,7 +136,7 @@ export const bot = new LemmyBot({
             });
 
             if (isMod) {
-                const userSearchOptions = findUsersToAllow(content);
+                const userSearchOptions = parseUsersToAllow(content);
 
                 await Promise.allSettled(
                     userSearchOptions.map((username) =>
