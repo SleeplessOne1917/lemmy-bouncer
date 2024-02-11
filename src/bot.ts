@@ -2,18 +2,21 @@ import { LemmyBot } from 'lemmy-bot';
 import { findUsersToAllow, isAllowedToPost } from './utils';
 import { addToAllowList } from './db';
 
+const { LOCAL_INSTANCE, USERNAME, PASSWORD, DB_FILE, COMMUNITY } =
+    process.env as Record<string, string>;
+
 export const bot = new LemmyBot({
-    instance: 'hexbear.net',
+    instance: LOCAL_INSTANCE,
     credentials: {
-        password: 'password',
-        username: 'bouncerbot',
+        password: PASSWORD,
+        username: USERNAME,
     },
-    dbFile: 'db.sqlite3',
+    dbFile: DB_FILE,
     federation: {
         allowList: [
             {
-                instance: 'hexbear.net',
-                communities: ['traaaaaaannnnnnnnnns'],
+                instance: LOCAL_INSTANCE,
+                communities: [COMMUNITY],
             },
         ],
     },
@@ -119,7 +122,7 @@ export const bot = new LemmyBot({
             },
         }) {
             const communityResponse = await getCommunity({
-                name: 'traaaaaaannnnnnnnnns',
+                name: `${COMMUNITY}@${LOCAL_INSTANCE}`,
             }).catch(() => null);
 
             if (!communityResponse) {

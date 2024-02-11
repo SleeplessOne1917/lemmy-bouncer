@@ -1,4 +1,4 @@
-import { PersonMentionView, SearchOptions } from 'lemmy-bot';
+import { PersonMentionView } from 'lemmy-bot';
 import { isUserIdInAllowlist } from './db';
 
 type Person = PersonMentionView['creator']; // I really should export all of the lemmy-js-client types from lemmy-bot
