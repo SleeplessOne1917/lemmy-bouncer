@@ -1,5 +1,9 @@
 import { GetPersonDetailsResponse, LemmyBot } from 'lemmy-bot';
-import { parseUsersToAllow, isAllowedToPost } from './utils';
+import {
+    parseUsersToAllow,
+    isAllowedToPost,
+    getInstanceFromActorId,
+} from './utils';
 import { addToAllowList } from './db';
 
 const { LOCAL_INSTANCE, USERNAME, PASSWORD, DB_FILE, COMMUNITY } =
@@ -41,7 +45,8 @@ export const bot = new LemmyBot({
                 if (!canPost) {
                     await createComment({
                         parent_id: id,
-                        content: 'Community disclaimer',
+                        content:
+                            "Your comment requires manual vetting by a community moderator. If it passes manual review by a moderator, it will be restored.\n\nIf you want to be allowed to comment without without manual vetting every time, please contact one of this community' moderators.",
                         post_id: postId,
                     });
                     const {
@@ -50,11 +55,11 @@ export const bot = new LemmyBot({
                         },
                     } = await reportComment({
                         comment_id: id,
-                        reason: 'User has yet to be vetted',
+                        reason: 'Vetting required',
                     });
                     await removeComment({
                         comment_id: id,
-                        reason: 'User cannot post to community unless vetted',
+                        reason: 'Cannot comment in !${COMMUNITY}@${LOCAL_INSTANCE} without manual vetting',
                         removed: true,
                     });
 
@@ -84,7 +89,8 @@ export const bot = new LemmyBot({
 
                 if (!canPost) {
                     await createComment({
-                        content: 'Community disclaimer',
+                        content:
+                            "Your post requires manual vetting by a community moderator. If it passes manual review by a moderator, it will be restored.\n\nIf you want to be allowed to post without without manual vetting every time, please contact one of this community's moderators.",
                         post_id: id,
                     });
                     const {
@@ -93,11 +99,11 @@ export const bot = new LemmyBot({
                         },
                     } = await reportPost({
                         post_id: id,
-                        reason: 'User has yet to be vetted',
+                        reason: 'Vetting required',
                     });
                     await removePost({
                         post_id: id,
-                        reason: 'User cannot post to community unless vetted',
+                        reason: 'Cannot post in !${COMMUNITY}@${LOCAL_INSTANCE} without manual vetting',
                         removed: true,
                     });
 
@@ -144,19 +150,27 @@ export const bot = new LemmyBot({
                     ),
                 );
 
-                await addToAllowList(
-                    personDetailsList
-                        .filter((res) => res.status === 'fulfilled')
-                        .map(
-                            (res) =>
-                                (
-                                    res as PromiseFulfilledResult<GetPersonDetailsResponse>
-                                ).value.person_view.person.id,
-                        ),
-                );
+                const fulfilled = personDetailsList
+                    .filter((res) => res.status === 'fulfilled')
+                    .map(
+                        (res) =>
+                            (
+                                res as PromiseFulfilledResult<GetPersonDetailsResponse>
+                            ).value.person_view.person,
+                    );
+
+                await addToAllowList(fulfilled.map((p) => p.id));
+
+                const message = personDetailsList.every(
+                    (res) => res.status === 'fulfilled',
+                )
+                    ? 'All users successfully added!'
+                    : fulfilled.length === 0
+                      ? 'Could not add any of the users you listed!'
+                      : `Added users:${fulfilled.reduce((acc, { name, actor_id }) => acc + `\n- @${name}@${getInstanceFromActorId(actor_id)}`, '')}\n\nCould not add users:${usersToAllow.filter((user) => !fulfilled.some((res) => res.name === user)).reduce((acc, name) => acc + `\n- ${name}`, '')}`;
 
                 await sendPrivateMessage({
-                    content: 'Users added!',
+                    content: message,
                     recipient_id: creator.id,
                 });
             }
