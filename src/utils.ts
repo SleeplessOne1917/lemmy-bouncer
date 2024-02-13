@@ -13,7 +13,8 @@ export function initInstanceAllowlist() {
     }
 }
 
-const actorIdRegex = /https?\/\/([^\/]+\.[^\/]+)\/u\/\S+/;
+const actorIdRegex =
+    /https?:\/\/([^\/]+(?:(?:\.[^\/]{2,})|(?::\d{2,5})))\/u\/\S+/;
 
 export function getInstanceFromActorId(actorId: string) {
     const match = actorIdRegex.exec(actorId);
@@ -33,7 +34,7 @@ export const isAllowedToPost = async ({ actor_id, id, local }: Person) =>
     ) ||
     (await isUserIdInAllowlist(id));
 
-const userExtractRegex = /.*(@(\S{3,})@(\S+\.\S{2,})).*/i;
+const userExtractRegex = /@(\S{3,})@(\S+(?:(?:\.\S{2,})|(?::\d{2,5})))/g;
 
 export function parseUsersToAllow(message: string) {
     const users: string[] = [];
@@ -43,7 +44,7 @@ export function parseUsersToAllow(message: string) {
         match;
         match = userExtractRegex.exec(message)
     ) {
-        users.push(`${match[2]}@${match[3]}`);
+        users.push(`${match[1]}@${match[2]}`);
     }
 
     return [...new Set(users)];

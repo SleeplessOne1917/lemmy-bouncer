@@ -5,11 +5,15 @@ import {
     getInstanceFromActorId,
 } from './utils';
 import { addToAllowList } from './db';
+import { config } from 'dotenv';
+
+config();
 
 const { LOCAL_INSTANCE, USERNAME, PASSWORD, DB_FILE, COMMUNITY } =
     process.env as Record<string, string>;
 
 export const bot = new LemmyBot({
+    secure: false,
     instance: LOCAL_INSTANCE,
     credentials: {
         password: PASSWORD,
@@ -128,7 +132,7 @@ export const bot = new LemmyBot({
             },
         }) {
             const communityResponse = await getCommunity({
-                name: `${COMMUNITY}@${LOCAL_INSTANCE}`,
+                name: COMMUNITY,
             }).catch(() => null);
 
             if (!communityResponse) {
@@ -142,32 +146,59 @@ export const bot = new LemmyBot({
             });
 
             if (isMod) {
+                let message: string;
                 const usersToAllow = parseUsersToAllow(content);
 
-                const personDetailsList = await Promise.allSettled(
-                    usersToAllow.map((username) =>
-                        getPersonDetails({ username }),
-                    ),
-                );
+                console.log(usersToAllow);
 
-                const fulfilled = personDetailsList
-                    .filter((res) => res.status === 'fulfilled')
-                    .map(
-                        (res) =>
-                            (
-                                res as PromiseFulfilledResult<GetPersonDetailsResponse>
-                            ).value.person_view.person,
+                if (usersToAllow.length > 0) {
+                    const personDetailsList = await Promise.allSettled(
+                        usersToAllow.map((username) =>
+                            getPersonDetails({ username }),
+                        ),
                     );
 
-                await addToAllowList(fulfilled.map((p) => p.id));
+                    const fulfilled = personDetailsList
+                        .filter((res) => res.status === 'fulfilled')
+                        .map(
+                            (res) =>
+                                (
+                                    res as PromiseFulfilledResult<GetPersonDetailsResponse>
+                                ).value.person_view.person,
+                        );
 
-                const message = personDetailsList.every(
-                    (res) => res.status === 'fulfilled',
-                )
-                    ? 'All users successfully added!'
-                    : fulfilled.length === 0
-                      ? 'Could not add any of the users you listed!'
-                      : `Added users:${fulfilled.reduce((acc, { name, actor_id }) => acc + `\n- @${name}@${getInstanceFromActorId(actor_id)}`, '')}\n\nCould not add users:${usersToAllow.filter((user) => !fulfilled.some((res) => res.name === user)).reduce((acc, name) => acc + `\n- ${name}`, '')}`;
+                    await addToAllowList(fulfilled.map((p) => p.id));
+
+                    message =
+                        usersToAllow.length === fulfilled.length
+                            ? 'All users successfully added!'
+                            : fulfilled.length === 0
+                              ? 'Could not add any of the users you listed!'
+                              : `Added users:${fulfilled.reduce(
+                                    (acc, { name, actor_id }) =>
+                                        acc +
+                                        `\n- @${name}@${getInstanceFromActorId(actor_id)}`,
+                                    '',
+                                )}\n\nCould not add users:${usersToAllow.reduce(
+                                    (acc, user) => {
+                                        if (
+                                            !fulfilled.some(
+                                                ({ actor_id, name }) =>
+                                                    user ===
+                                                    `${name}@${getInstanceFromActorId(actor_id)}`,
+                                            )
+                                        ) {
+                                            return acc + `\n- @${user}`;
+                                        } else {
+                                            return acc;
+                                        }
+                                    },
+                                    '',
+                                )}`;
+                } else {
+                    message =
+                        'I could not detect any usernames in your message. Please make sure the usernames you want to add follow the format "@user@instance".';
+                }
 
                 await sendPrivateMessage({
                     content: message,

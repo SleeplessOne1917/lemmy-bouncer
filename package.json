@@ -16,8 +16,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.2",
-    "lemmy-bot": "^0.6.0",
+    "dotenv": "^16.4.3",
+    "lemmy-bot": "^0.6.1",
     "sqlite3": "^5.1.7"
   }
 }

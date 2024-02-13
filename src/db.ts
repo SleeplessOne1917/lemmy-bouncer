@@ -2,8 +2,9 @@ import { existsSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { Database, verbose } from 'sqlite3';
+import { config } from 'dotenv';
 
-let memoryDb: Database | undefined = undefined;
+config();
 
 const sqlite = verbose();
 
@@ -20,7 +21,7 @@ const parallelize = (db: Database, callback: () => Promise<void>) =>
 const rowExists = (db: Database, id: number) =>
     new Promise<boolean>((resolve, reject) => {
         db.get(
-            `SELECT id, reprocessTime FROM ${USER_ALLOWLIST_TABLE} WHERE id=?;`,
+            `SELECT id FROM ${USER_ALLOWLIST_TABLE} WHERE id=?;`,
             id,
             (err, row: { reprocessTime: number }) => {
                 if (err) {
@@ -70,12 +71,7 @@ async function useDatabase(doStuffWithDB: (db: Database) => Promise<void>) {
     let db: Database;
 
     if (!DB_FILE) {
-        if (memoryDb) {
-            db = memoryDb;
-        } else {
-            memoryDb = new Database(':memory:');
-            db = memoryDb;
-        }
+        db = new Database(':memory:');
     } else {
         db = new sqlite.Database(DB_FILE);
     }
