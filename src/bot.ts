@@ -9,11 +9,11 @@ import { config } from 'dotenv';
 
 config();
 
-const { LOCAL_INSTANCE, USERNAME, PASSWORD, DB_FILE, COMMUNITY } =
+const { LOCAL_INSTANCE, USERNAME, PASSWORD, DB_FILE, COMMUNITY, NODE_ENV } =
     process.env as Record<string, string>;
 
 export const bot = new LemmyBot({
-    secure: false,
+    secure: NODE_ENV === 'production',
     instance: LOCAL_INSTANCE,
     credentials: {
         password: PASSWORD,
