@@ -4,8 +4,8 @@
   "description": "Protect your Lemmy community from unvetted posters.",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node NODE_ENV=production main.ts",
-    "dev": "ts-node NODE_ENV=development main.ts"
+    "start": "NODE_ENV=production ts-node main.ts",
+    "dev": "NODE_ENV=development ts-node main.ts"
   },
   "keywords": [],
   "author": "SleeplessOne1917",
