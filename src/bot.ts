@@ -63,7 +63,7 @@ export const bot = new LemmyBot({
                     });
                     await removeComment({
                         comment_id: id,
-                        reason: 'Cannot comment in !${COMMUNITY}@${LOCAL_INSTANCE} without manual vetting',
+                        reason: `Cannot comment in !${COMMUNITY}@${LOCAL_INSTANCE} without manual vetting`,
                         removed: true,
                     });
 
